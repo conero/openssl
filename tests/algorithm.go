@@ -27,6 +27,7 @@ var algListString = strings.Join(algList, ",")
 type Algorithm struct {
 	Alg string
 	Key string
+	Iv  string // 初始化向量值
 }
 
 func NewAlgorithm(alg, key string) *Algorithm {
@@ -39,6 +40,10 @@ func NewAlgorithm(alg, key string) *Algorithm {
 
 // Encode 加密
 func (a *Algorithm) Encode(origin string) (string, error) {
+	var iv []byte
+	if a.Iv != "" {
+		iv = []byte(a.Iv)
+	}
 	switch a.Alg {
 	case AlgAesEcb:
 		dst, err := openssl.AesECBEncrypt([]byte(origin), []byte(a.Key), openssl.PKCS7_PADDING)
@@ -47,7 +52,9 @@ func (a *Algorithm) Encode(origin string) (string, error) {
 		}
 		return "", err
 	case AlgAesCbc:
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.AesCBCEncrypt([]byte(origin), []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return base64.StdEncoding.EncodeToString(dst), nil
@@ -60,7 +67,9 @@ func (a *Algorithm) Encode(origin string) (string, error) {
 		}
 		return "", err
 	case AlgDesCbc:
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.DesCBCEncrypt([]byte(origin), []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return base64.StdEncoding.EncodeToString(dst), nil
@@ -73,7 +82,9 @@ func (a *Algorithm) Encode(origin string) (string, error) {
 		}
 		return "", err
 	case Alg3DesCbc:
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.Des3CBCEncrypt([]byte(origin), []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return base64.StdEncoding.EncodeToString(dst), nil
@@ -86,6 +97,10 @@ func (a *Algorithm) Encode(origin string) (string, error) {
 
 // Decode 解密
 func (a *Algorithm) Decode(cipher string) (string, error) {
+	var iv []byte
+	if a.Iv != "" {
+		iv = []byte(a.Iv)
+	}
 	switch a.Alg {
 	case AlgAesEcb:
 		by, er := base64.StdEncoding.DecodeString(cipher)
@@ -102,7 +117,9 @@ func (a *Algorithm) Decode(cipher string) (string, error) {
 		if er != nil {
 			return "", errors.New(fmt.Sprintf("密文进行 base64 提取错误\n  %v", er))
 		}
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.AesCBCDecrypt(by, []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return string(dst), nil
@@ -123,7 +140,9 @@ func (a *Algorithm) Decode(cipher string) (string, error) {
 		if er != nil {
 			return "", errors.New(fmt.Sprintf("密文进行 base64 提取错误\n  %v", er))
 		}
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.DesCBCDecrypt(by, []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return string(dst), nil
@@ -144,7 +163,9 @@ func (a *Algorithm) Decode(cipher string) (string, error) {
 		if er != nil {
 			return "", errors.New(fmt.Sprintf("密文进行 base64 提取错误\n  %v", er))
 		}
-		iv := []byte(a.Key)
+		if iv == nil {
+			iv = []byte(a.Key)
+		}
 		dst, err := openssl.Des3CBCDecrypt(by, []byte(a.Key), iv, openssl.PKCS7_PADDING)
 		if err == nil {
 			return string(dst), nil

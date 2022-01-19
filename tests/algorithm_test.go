@@ -8,14 +8,19 @@ import (
 // AES-ECB			16/24
 // AES-CBC			16/32
 // 3DES-ECB			24
+// DES-ECB			8
+// DES-CBC			8
+// 3DES-ECB			24
 func TestAlgorithm_Encode_all(t *testing.T) {
 	//秘钥长度：16/24/32
 	// 随机密文
-	key := str.RandStr.SafeStr(32)
+	bit := 24
+	key := str.RandStr.SafeStr(bit)
 	origin := str.RandStr.SafeStr(500) + "中华人民共和国-贵州.贵阳"
 
 	for _, algStr := range algList {
 		alg := NewAlgorithm(algStr, key)
+		alg.Iv = str.RandStr.SafeStr(16)
 		cp, err := alg.Encode(origin)
 		if err != nil {
 			t.Errorf("算法 %v 加密错误，%v", algStr, err)
