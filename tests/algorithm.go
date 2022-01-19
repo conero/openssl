@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/forgoer/openssl"
+	"github.com/conero/openssl"
 	"strings"
 )
 
